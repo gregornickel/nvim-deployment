@@ -8,7 +8,7 @@ Easily push or pull individual files or full projects between your local workspa
 
 ## ✨ Features
 
-- 🔁 Sync on `:w` (auto-push on save)
+- 🔄 Sync on `:w` (auto-push on save)
 - 📦 Full project push/pull via rsync
 - 📄 Single file push/pull by relative path
 - 🖥️ Multi-cluster support via external config
@@ -39,13 +39,13 @@ Then run:
 :Lazy sync
 ```
 
-## 📌 Requirements
+## 📋 Requirements and Setup
 
-- `rsync` installed locally
+- `rsync` installed on both local and remote machines
 - `ssh` access to your cluster
 - `config.lua` config file
 
-### 📁 Required Config File
+### Config File
 
 Create a file at `~/.cluster_sync/config.lua` like this:
 
@@ -69,32 +69,39 @@ return {
     mycluster = "/home/username",
   },
 
-  -- Local root directory for project detection
+  -- Local root directories where projects are stored
   PROJECT_ROOTS = {
     os.getenv("HOME") .. "/projects",
   },
 
+  -- Optional
   PROJECT_EXCLUDE_PATTERNS = {
     myproject = "*.zarr *.npy",
   },
 
+  -- Optional
   PROJECT_EXCLUDE_DIRS = {
     myproject = "__pycache__/ data_cache/",
   },
 }
 ```
+- `mycluster` is a short name you define to refer to a remote cluster. It's used with `:SyncSet` (e.g. `:SyncSet mycluster`) and maps to the corresponding SSH login details in your config. It does not need to match any alias in your `~/.ssh/config`.
+- SSH access is done via `username@host` using the values from `CLUSTERS_USER` and `CLUSTERS_HOST`. For smooth usage, you should have passwordless SSH (e.g. via SSH keys) set up for each cluster.
+- `myproject` is the name of your local project folder. It's used to apply file and directory exclusions. This folder must exist inside one of the directories listed in `PROJECT_ROOTS`.
 
-## 🔑 Available Commands
 
-Command                | Description
------------------------|------------------------------------------
-`:SyncSet <cluster>`   | Set the current active cluster
-`:SyncClear`           | Clear active cluster
-`:SyncStatus`          | Show current sync cluster info
-`:SyncPushProject`     | Push the full project to the cluster
-`:SyncPullProject`     | Pull the full project from the cluster
-`:SyncPushFile <file>` | Push a specific file (relative to project)
-`:SyncPullFile <file>` | Pull a specific file (relative to project)
+## 🔧 Commands
 
-**Note**: After `:SyncSet`, every `:w` will auto-push the current file.
+| Command                | 🔧| Description                                                                   |
+|------------------------|---|-------------------------------------------------------------------------------|
+| `:SyncSet <cluster>`   |   | Set the current active cluster                                                |
+| `:SyncClear`           |   | Clear active cluster                                                          |
+| `:SyncStatus`          |   | Show active cluster info                                                      |
+| `:w`                   | 🔄| Automatically pushes the current file when a cluster is set                   |
+| `:SyncPushProject`     | ⬆️ | Push the full project to the cluster                                          |
+| `:SyncPullProject`     | ⬇️ | Pull the full project from the cluster                                        |
+| `:SyncPushFile <file>` | ⤴️ | Push a specific file (relative to your project root, e.g. `scripts/train.py`) |
+| `:SyncPullFile <file>` | ⤵️ | Pull a specific file (relative to your project root, e.g. `scripts/train.py`) |
+
+👉 Before using any sync commands, make sure to run `:SyncSet <cluster>` to have an active target.
 
